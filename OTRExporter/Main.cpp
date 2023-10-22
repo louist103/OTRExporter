@@ -26,7 +26,7 @@
 #include <bit>
 #include <mutex>
 
-std::string otrFileName = "oot.otr";
+std::string otrFileName = "mm.otr";
 std::shared_ptr<LUS::Archive> otrArchive;
 BinaryWriter* fileWriter;
 std::chrono::steady_clock::time_point fileStart, resStart;

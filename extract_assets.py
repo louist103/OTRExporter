@@ -12,7 +12,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None):
     shutil.copytree("assets", "Extract/assets")
 
     if not zapd_exe:
-        zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
+        zapd_exe = "Debug\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
     exec_cmd = [zapd_exe, "ed", "-eh", "-i", xmlPath, "-b", rom, "-fl", "CFG/filelists",
                 "-o", "placeholder", "-osf", "placeholder", "-rconf", "CFG/Config.xml"]
@@ -23,7 +23,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None):
     else:
         # generate otrs, but not headers
         exec_cmd.extend(["-gsf", "0", "-se", "OTR", "--otrfile",
-                "oot-mq.otr" if Z64Rom.isMqRom(rom) else "oot.otr"])
+                "oot-mq.otr" if Z64Rom.isMqRom(rom) else "mm.otr"])
 
     print(exec_cmd)
     exitValue = subprocess.call(exec_cmd)
@@ -37,7 +37,7 @@ def BuildSohOtr(zapd_exe=None):
     shutil.copytree("assets", "Extract/assets")
 
     if not zapd_exe:
-        zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
+        zapd_exe = "Debug\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
     exec_cmd = [zapd_exe, "botr", "-se", "OTR", "--norom"]
 
@@ -67,12 +67,12 @@ def main():
         BuildSohOtr(args.zapd_exe)
         return
 
-    roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
-    for rom in roms:
-        if (os.path.exists("Extract")):
-            shutil.rmtree("Extract")
+#    //roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
+#    //for rom in roms:
+#    //    if (os.path.exists("Extract")):
+#    //        shutil.rmtree("Extract")
 
-        BuildOTR("../soh/assets/xml/" + rom.version.xml_ver + "/", rom.file_path, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
+        BuildOTR("../mm/assets/xml/", baserom_uncompressed.z64, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
 
 if __name__ == "__main__":
     main()
