@@ -23,6 +23,7 @@ set(Header_Files
     "SkeletonLimbExporter.h"
     "TextExporter.h"
     "TextureExporter.h"
+    "TextureAnimationExporter.h"
     "VersionInfo.h"
     "VtxExporter.h"
     "z64cutscene.h"
@@ -49,6 +50,7 @@ set(Source_Files
     "SkeletonLimbExporter.cpp"
     "TextExporter.cpp"
     "TextureExporter.cpp"
+    "TextureAnimationExporter.cpp"
     "VersionInfo.cpp"
     "VtxExporter.cpp"
 )

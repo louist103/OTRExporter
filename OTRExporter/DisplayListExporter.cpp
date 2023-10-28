@@ -868,7 +868,10 @@ std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
 	}
 	else if (StringHelper::Contains(oName, "_room"))
 	{
-		oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+		if (Globals::Instance->game != ZGame::MM_RETAIL)
+			oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+		else
+			oName = StringHelper::Split(oName, "_room")[0];
 	}
 
 	if (prefix != "")
@@ -883,7 +886,7 @@ std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
 	std::string prefix = "";
 	std::string xmlPath = StringHelper::Replace(res->parent->GetXmlFilePath().string(), "\\", "/");
 
-	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room")) {
+	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room") || (StringHelper::Contains(res->parent->GetXmlFilePath().string(), "/scenes/") || StringHelper::Contains(res->parent->GetXmlFilePath().string(), "\\scenes\\"))) {
 		prefix = "scenes";
         if (Globals::Instance->rom->IsMQ()) {
             prefix += "/mq";
