@@ -23,7 +23,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None):
     else:
         # generate otrs, but not headers
         exec_cmd.extend(["-gsf", "0", "-se", "OTR", "--otrfile",
-                "oot-mq.otr" if Z64Rom.isMqRom(rom) else "mm.otr"])
+                "mm.otr" if Z64Rom.isMMRom(rom) else ("oot-mq.otr" if Z64Rom.isMqRom(rom) else "oot.otr")])
 
     print(exec_cmd)
     exitValue = subprocess.call(exec_cmd)
@@ -67,12 +67,15 @@ def main():
         BuildSohOtr(args.zapd_exe)
         return
 
-#    //roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
-#    //for rom in roms:
-#    //    if (os.path.exists("Extract")):
-#    //        shutil.rmtree("Extract")
+    roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
+    for rom in roms:
+        if (not rom.isMMRom):
+            continue
 
-        BuildOTR("../mm/assets/xml/", baserom_uncompressed.z64, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
+        if (os.path.exists("Extract")):
+            shutil.rmtree("Extract")
+
+        BuildOTR("../mm/assets/xml/", rom.file_path, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
 
 if __name__ == "__main__":
     main()
