@@ -27,7 +27,7 @@ do_action_static
 message_static
 message_texture_static
 nes_font_static
-message_data_static
+message_data_static_jp
 staff_message_data_static
 code
 ovl_title
