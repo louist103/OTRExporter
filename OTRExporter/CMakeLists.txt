@@ -163,7 +163,6 @@ FetchContent_MakeAvailable(StormLib)
 target_include_directories(${PROJECT_NAME} PRIVATE ${stormlib_SOURCE_DIR}/src)
 
 if(MSVC)
-    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64" OR "${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM64")
         target_compile_options(${PROJECT_NAME} PRIVATE
 		    $<$<CONFIG:Debug>:
             /Od;
@@ -179,24 +178,6 @@ if(MSVC)
             ${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT};
             ${DEFAULT_CXX_EXCEPTION_HANDLING}
         )
-    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
-        target_compile_options(${PROJECT_NAME} PRIVATE
-            $<$<CONFIG:Debug>:
-            /Od;
-            /Oi-
-			>
-			$<$<CONFIG:Release>:
-                /Oi;
-                /Gy
-            >
-            /permissive-;
-            /sdl;
-            /W3;
-            ${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT};
-            ${DEFAULT_CXX_EXCEPTION_HANDLING}
-        )
-    endif()
-    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64" OR "${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM64")
         target_link_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Release>:
                 /OPT:REF;
@@ -204,17 +185,6 @@ if(MSVC)
             >
             /SUBSYSTEM:CONSOLE
         )
-    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
-        target_link_options(${PROJECT_NAME} PRIVATE
-            $<$<CONFIG:Release>:
-                /DEBUG;
-                /OPT:REF;
-                /OPT:ICF;
-                /INCREMENTAL:NO
-            >
-            /SUBSYSTEM:CONSOLE
-        )
-    endif()
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|AppleClang")
