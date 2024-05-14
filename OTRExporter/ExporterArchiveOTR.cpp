@@ -28,9 +28,7 @@ bool ExporterArchiveOtr::Load(bool enableWriting) {
         printf(fullPath.c_str());
         printf("\n");
         mMpq = mpqHandle;
-        mPath = fullPath;
-
-        
+        mPath = fullPath;       
         baseLoaded = true;
     }
 

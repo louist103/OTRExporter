@@ -52,6 +52,7 @@ bool ExporterArchiveO2R::Unload() {
 int ExporterArchiveO2R::CreateArchive([[maybe_unused]] size_t fileCapacity) {
     int openErr;
     zip_t* zip;
+    
     {
         const std::lock_guard<std::mutex> lock(mMutex);
         zip = zip_open(mPath.c_str(), ZIP_CREATE, &openErr);
@@ -67,8 +68,6 @@ int ExporterArchiveO2R::CreateArchive([[maybe_unused]] size_t fileCapacity) {
     mZip = zip;
     SPDLOG_INFO("Loaded ZIP (O2R) archive: {}", mPath.c_str());
     return 0;
-
-
 }
 
 bool ExporterArchiveO2R::AddFile(const std::string& filePath, void* fileData, size_t fileSize) {
@@ -81,13 +80,6 @@ bool ExporterArchiveO2R::AddFile(const std::string& filePath, void* fileData, si
         zip_error_fini(zipError);
         return false;
     }
-    //if (zip_source_commit_write(source) < 0) {
-    //    zip_error_t* zipError = zip_source_error(source);
-    //    SPDLOG_ERROR("Failed to add file to ZIP. Error: {}", zip_error_strerror(zipError));
-    //    zip_error_fini(zipError);
-    //    zip_source_free(source);
-    //    return false;
-    //}
 
     if (zip_file_add(mZip, filePath.c_str(), source, ZIP_FL_OVERWRITE | ZIP_FL_ENC_UTF_8) < 0) {
         zip_error_t* zipError = zip_get_error(mZip);
@@ -96,7 +88,6 @@ bool ExporterArchiveO2R::AddFile(const std::string& filePath, void* fileData, si
         zip_error_fini(zipError);
         return false;
     }
-
 
     return true;
 }
