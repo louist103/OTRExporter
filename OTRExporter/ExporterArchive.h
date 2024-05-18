@@ -19,9 +19,7 @@ class ExporterArchive : public std::enable_shared_from_this<ExporterArchive> {
     virtual bool AddFile(const std::string& filePath, void* fileData, size_t fileSize) = 0;
 
     std::string mPath;
-    std::mutex mMutex;
-    std::vector<std::string> mAddedFiles;
-    std::unordered_map<uint64_t, std::string> mHashes;
+    std::mutex mMutex;  
 
     virtual bool Load(bool enableWriting) = 0;
     virtual bool Unload() = 0;

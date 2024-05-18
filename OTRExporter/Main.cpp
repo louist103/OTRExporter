@@ -185,7 +185,7 @@ static void ExporterProgramEnd()
     const auto& lst = Directory::ListFiles(customAssetsPath);
 
     printf("Generating Custom OTR Archive...\n");
-    auto customOtr = std::make_shared<ExporterArchiveO2R>(customOtrFileName, true);
+    auto customOtr = std::make_unique<ExporterArchiveO2R>(customOtrFileName, true);
     customOtr->CreateArchive(40000);
     
     printf("Adding portVersion file.\n");
@@ -257,7 +257,6 @@ static void ExporterProgramEnd()
     }
 
     printf("Done\n");
-    customOtr = nullptr;
 }
 
 static void ExporterParseArgs(int argc, char* argv[], int& i)

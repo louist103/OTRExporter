@@ -18,7 +18,11 @@ class ExporterArchiveOtr : public ExporterArchive {
     int CreateArchive(size_t fileCapacity) override;
     bool AddFile(const std::string& filePath, void* fileData, size_t fileSize) override;
 
-    HANDLE mMpq;
     bool Load(bool enableWriting) override;
     bool Unload() override;
+
+  private:
+    std::unordered_map<uint64_t, std::string> mHashes;
+    std::vector<std::string> mAddedFiles;
+    HANDLE mMpq;
 };
