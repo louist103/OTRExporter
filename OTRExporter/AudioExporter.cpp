@@ -37,6 +37,29 @@ const char* OTRExporter_Audio::GetCachePolicyStr(uint8_t policy) {
     }
 }
 
+const char* OTRExporter_Audio::GetCodecStr(uint8_t codec) {
+    switch (codec) {
+        case 0:
+            return "ADPCM";
+        case 1:
+            return "S8";
+        case 2:
+            return "S16MEM";
+        case 3:
+            return "ADPCMSMALL";
+        case 4:
+            return "REVERB";
+        case 5:
+            return "S16";
+        case 6:
+            return "UNK6";
+        case 7:
+            return "UNK7";
+        default:
+            return "ERROR";
+    }
+}
+
 std::string OTRExporter_Audio::GetSampleEntryReference(ZAudio* audio, SampleEntry* entry, std::map<uint32_t, SampleEntry*> samples)
 {
 
@@ -86,7 +109,33 @@ void OTRExporter_Audio::WriteSampleEntry(SampleEntry* entry, BinaryWriter* write
         writer->Write((entry->book.books[i]));
 }
 
+void OTRExporter_Audio::WriteSampleEntry(SampleEntry* entry, tinyxml2::XMLElement* xmlDoc) {
+    tinyxml2::XMLElement* sEntry = xmlDoc;
 
+    sEntry->SetAttribute("Codec", GetCodecStr(entry->codec));
+    sEntry->SetAttribute("Medium", GetMediumStr(entry->medium));
+    sEntry->SetAttribute("bit26", entry->unk_bit26);
+    sEntry->SetAttribute("Relocated", entry->unk_bit25);
+    
+    sEntry->SetAttribute("LoopStart", entry->loop.start);
+    sEntry->SetAttribute("LoopEnd", entry->loop.end);
+    
+    for (size_t i = 0; i < entry->loop.states.size(); i++) {
+        tinyxml2::XMLElement* loop = sEntry->InsertNewChildElement("LoopState");
+        loop->SetAttribute("Loop", entry->loop.states[i]);
+        sEntry->InsertEndChild(loop);
+    }
+
+    sEntry->SetAttribute("Order", entry->book.order);
+    sEntry->SetAttribute("Npredictors", entry->book.npredictors);
+
+    for (size_t i = 0; i < entry->loop.states.size(); i++) {
+        tinyxml2::XMLElement* book = sEntry->InsertNewChildElement("Books");
+        book->SetAttribute("Book", entry->book.books[i]);
+        sEntry->InsertEndChild(book);
+    }
+
+}
 
 void OTRExporter_Audio::WriteSoundFontEntry(ZAudio* audio, SoundFontEntry* entry, std::map<uint32_t, SampleEntry*> samples, BinaryWriter* writer)
 {
@@ -203,7 +252,7 @@ void OTRExporter_Audio::WriteSoundFontTableXML(ZAudio* audio) {
         
         std::string fName = OTRExporter_DisplayList::GetPathToRes(
             (ZResource*)(audio), StringHelper::Sprintf("fonts/%s", audio->soundFontNames[i].c_str()));
-        std::vector<char> xmlData((printer.CStr()), printer.CStr() + printer.CStrSize());
+        std::vector<char> xmlData((printer.CStr()), printer.CStr() + printer.CStrSize() - 1);
         AddFile(fName, xmlData);
     }
 }
@@ -303,7 +352,7 @@ void OTRExporter_Audio::WriteSequenceXML(ZAudio* audio) {
 
         std::string seqMetaName = OTRExporter_DisplayList::GetPathToRes(
             (ZResource*)(audio), StringHelper::Sprintf("sequences/%s_META", audio->seqNames[i].c_str()));
-        std::vector<char> xmlData((printer.CStr()), printer.CStr() + printer.CStrSize());
+        std::vector<char> xmlData((printer.CStr()), printer.CStr() + printer.CStrSize() - 1);
         AddFile(seqMetaName, xmlData);
     }
 }
@@ -333,6 +382,101 @@ void OTRExporter_Audio::WriteSequenceBinary(ZAudio* audio) {
     }
 }
 
+std::string OTRExporter_Audio::GetSampleEntryStr(ZAudio* audio, const std::pair<const uint32_t, SampleEntry*>& pair) {
+    std::string basePath = "";
+
+    if (audio->sampleOffsets[pair.second->bankId].find(pair.second->sampleLoopOffset) !=
+        audio->sampleOffsets[pair.second->bankId].end()) {
+        if (audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset].find(
+                pair.second->sampleDataOffset) !=
+            audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset].end())
+            basePath = StringHelper::Sprintf(
+                "samples/%s",
+                audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset][pair.second->sampleDataOffset]
+                    .c_str());
+        else
+            basePath = StringHelper::Sprintf("samples/sample_%08X", pair.first);
+    } else
+        basePath = StringHelper::Sprintf("samples/sample_%08X", pair.first);
+    return basePath;
+}
+
+std::string OTRExporter_Audio::GetSampleDataStr(ZAudio* audio, const std::pair<const uint32_t, SampleEntry*>& pair) {
+    std::string basePath = "";
+
+    if (audio->sampleOffsets[pair.second->bankId].find(pair.second->sampleLoopOffset) !=
+        audio->sampleOffsets[pair.second->bankId].end()) {
+        if (audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset].find(
+                pair.second->sampleDataOffset) !=
+            audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset].end())
+            basePath = StringHelper::Sprintf(
+                "samples/%s",
+                audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset][pair.second->sampleDataOffset]
+                    .c_str());
+        else
+            basePath = StringHelper::Sprintf("sampledata/sample_%08X_RAW", pair.first);
+    } else
+        basePath = StringHelper::Sprintf("sampledata/sample_%08X_RAW", pair.first);
+    return basePath;
+}
+
+void OTRExporter_Audio::WriteSampleBinary(ZAudio* audio) {
+    ZResource* res = audio;
+
+    for (const auto& pair : audio->samples) {
+        MemoryStream* sampleStream = new MemoryStream();
+        BinaryWriter sampleWriter = BinaryWriter(sampleStream);
+
+        //writer->Write((uint32_t)pair.first);
+        WriteSampleEntry(pair.second, &sampleWriter);
+
+        std::string basePath = GetSampleEntryStr(audio, pair);
+
+        std::string fName = OTRExporter_DisplayList::GetPathToRes(res, basePath);
+        AddFile(fName, sampleStream->ToVector());
+    }
+}
+
+void OTRExporter_Audio::WriteSampleXML(ZAudio* audio) {
+    ZResource* res = audio;
+
+    for (const auto& pair : audio->samples) {
+        tinyxml2::XMLDocument sample;
+        tinyxml2::XMLElement* root = sample.NewElement("Sample");
+
+        WriteSampleEntry(pair.second, root);
+
+        root->SetAttribute("SampleSize", (size_t)pair.second->data.size());
+        sample.InsertEndChild(root);
+        
+        std::string sampleDataPath = GetSampleDataStr(audio, pair);
+        sampleDataPath = OTRExporter_DisplayList::GetPathToRes(res, sampleDataPath);
+
+        root->SetAttribute("SamplePath", sampleDataPath.c_str());
+
+        std::string basePath = GetSampleEntryStr(audio, pair);
+        std::string fName = OTRExporter_DisplayList::GetPathToRes(res, basePath);
+
+        fName += "_META";
+
+        tinyxml2::XMLPrinter printer;
+        sample.Accept(&printer);
+        std::vector<char> xmlData((printer.CStr()), printer.CStr() + printer.CStrSize() - 1);
+        AddFile(fName, xmlData);
+
+
+
+        MemoryStream* stream = new MemoryStream();
+        BinaryWriter sampleDataWriter = BinaryWriter(stream);
+        
+        sampleDataWriter.Write((char*)pair.second->data.data(), pair.second->data.size());
+        AddFile(sampleDataPath, stream->ToVector());
+
+    }
+}
+
+
+
 void OTRExporter_Audio::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
     ZAudio* audio = (ZAudio*)res;
@@ -340,33 +484,11 @@ void OTRExporter_Audio::Save(ZResource* res, const fs::path& outPath, BinaryWrit
     WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::SOH_Audio), 2);
 
     // Write Samples as individual files
-    for (auto pair : audio->samples)
-    {
-        MemoryStream* sampleStream = new MemoryStream();
-        BinaryWriter sampleWriter = BinaryWriter(sampleStream);
-
-        writer->Write((uint32_t)pair.first);
-        WriteSampleEntry(pair.second, &sampleWriter);
-
-        std::string basePath = "";
-
-        if (audio->sampleOffsets[pair.second->bankId].find(pair.second->sampleLoopOffset) != audio->sampleOffsets[pair.second->bankId].end())
-        {
-            if (audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset].find(pair.second->sampleDataOffset) != audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset].end())
-                basePath = StringHelper::Sprintf("samples/%s", audio->sampleOffsets[pair.second->bankId][pair.second->sampleLoopOffset][pair.second->sampleDataOffset].c_str());
-            else
-                basePath = StringHelper::Sprintf("samples/sample_%08X", pair.first);
-        }
-        else
-            basePath = StringHelper::Sprintf("samples/sample_%08X", pair.first);
-
-        std::string fName = OTRExporter_DisplayList::GetPathToRes(res, basePath);
-        AddFile(fName, sampleStream->ToVector());
-    }
+    WriteSampleXML(audio);
 
     // Write the soundfont table
-    WriteSoundFontTableBinary(audio);
+    WriteSoundFontTableXML(audio);
     
     // Write Sequences
-    WriteSequenceBinary(audio);
+    WriteSequenceXML(audio);
 }
