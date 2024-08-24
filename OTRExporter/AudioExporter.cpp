@@ -69,13 +69,13 @@ std::string OTRExporter_Audio::GetSampleEntryReference(ZAudio* audio, SampleEntr
         {
             if (audio->sampleOffsets[entry->bankId][entry->sampleLoopOffset].find(entry->sampleDataOffset) != audio->sampleOffsets[entry->bankId][entry->sampleLoopOffset].end())
             {
-                return(StringHelper::Sprintf("audio/samples/%s", audio->sampleOffsets[entry->bankId][entry->sampleLoopOffset][entry->sampleDataOffset].c_str()));
+                return(StringHelper::Sprintf("audio/samples/%s_META", audio->sampleOffsets[entry->bankId][entry->sampleLoopOffset][entry->sampleDataOffset].c_str()));
             }
             else
-                return(entry->fileName);
+                return (entry->fileName + "_META");
         }
         else
-            return(entry->fileName);
+            return (entry->fileName + "_META");
     }
     else
         return("");
@@ -119,6 +119,7 @@ void OTRExporter_Audio::WriteSampleEntry(SampleEntry* entry, tinyxml2::XMLElemen
     
     sEntry->SetAttribute("LoopStart", entry->loop.start);
     sEntry->SetAttribute("LoopEnd", entry->loop.end);
+    sEntry->SetAttribute("LoopCount", entry->loop.count);
     
     for (size_t i = 0; i < entry->loop.states.size(); i++) {
         tinyxml2::XMLElement* loop = sEntry->InsertNewChildElement("LoopState");
@@ -129,7 +130,7 @@ void OTRExporter_Audio::WriteSampleEntry(SampleEntry* entry, tinyxml2::XMLElemen
     sEntry->SetAttribute("Order", entry->book.order);
     sEntry->SetAttribute("Npredictors", entry->book.npredictors);
 
-    for (size_t i = 0; i < entry->loop.states.size(); i++) {
+    for (size_t i = 0; i < entry->book.books.size(); i++) {
         tinyxml2::XMLElement* book = sEntry->InsertNewChildElement("Books");
         book->SetAttribute("Book", entry->book.books[i]);
         sEntry->InsertEndChild(book);
@@ -443,6 +444,7 @@ void OTRExporter_Audio::WriteSampleXML(ZAudio* audio) {
     for (const auto& pair : audio->samples) {
         tinyxml2::XMLDocument sample;
         tinyxml2::XMLElement* root = sample.NewElement("Sample");
+        root->SetAttribute("Version", 0);
 
         WriteSampleEntry(pair.second, root);
 
