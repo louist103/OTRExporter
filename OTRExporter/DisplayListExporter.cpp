@@ -46,6 +46,8 @@
 {    (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) | _SHIFTL(yh, 0, 12)),\
     (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)) }
 
+#define UCODE_F3DEX2 (int8_t) 4
+
 void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
@@ -53,6 +55,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 	//printf("Exporting DList %s\n", dList->GetName().c_str());
 
 	WriteHeader(res, outPath, writer, static_cast<uint32_t>(LUS::ResourceType::DisplayList));
+	writer->Write(UCODE_F3DEX2);
 
 	while (writer->GetBaseAddress() % 8 != 0)
 		writer->Write((uint8_t)0xFF);
