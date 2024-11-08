@@ -192,7 +192,8 @@ static void ExporterProgramEnd()
     customOtr->CreateArchive(40000);
     
     printf("Adding portVersion file.\n");
-    customOtr->AddFile("portVersion", portVersionStream->ToVector().data(), portVersionStream->GetLength());
+    auto portVersionStreamBuffer = portVersionStream->ToVector();
+    customOtr->AddFile("portVersion", (void*)portVersionStreamBuffer.data(), portVersionStream->GetLength());
 
     std::vector<Data> dataVec;
     std::vector<DataU> dataVec2;
