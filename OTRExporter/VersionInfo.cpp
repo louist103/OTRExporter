@@ -21,6 +21,6 @@ void InitVersionInfo()
 	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Cutscene), 0 },
 	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Array), 0 },
 	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Text), 0 },
-	{ static_cast<uint32_t>(Fast::ResourceType::Blob), 0 },
+	{ static_cast<uint32_t>(Ship::ResourceType::Blob), 0 },
 	};
 }
