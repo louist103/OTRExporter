@@ -54,7 +54,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 	//printf("Exporting DList %s\n", dList->GetName().c_str());
 
-	WriteHeader(res, outPath, writer, static_cast<uint32_t>(LUS::ResourceType::DisplayList));
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(Fast::ResourceType::DisplayList));
 	writer->Write(UCODE_F3DEX2);
 
 	while (writer->GetBaseAddress() % 8 != 0)

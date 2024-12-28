@@ -4,13 +4,13 @@
 void OTRExporter_Texture::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZTexture* tex = (ZTexture*)res;
-	
-	WriteHeader(tex, outPath, writer, static_cast<uint32_t>(LUS::ResourceType::Texture));
+
+	WriteHeader(tex, outPath, writer, static_cast<uint32_t>(Fast::ResourceType::Texture));
 
 	auto start = std::chrono::steady_clock::now();
 
 	//printf("Exporting Texture %s\n", tex->GetName().c_str());
-	
+
 	writer->Write((uint32_t)tex->GetTextureType());
 	writer->Write((uint32_t)tex->GetWidth());
 	writer->Write((uint32_t)tex->GetHeight());
