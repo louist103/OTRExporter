@@ -171,6 +171,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/src/resource
     ${CMAKE_CURRENT_SOURCE_DIR}/../../mm/2s2h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../ZAPDTR/lib/tinyxml2
 	.
 )
 
@@ -179,6 +180,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
 
 find_package(spdlog REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC spdlog::spdlog)
+
+find_package(LibZip REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC LibZip::LibZip)
 
 FetchContent_Declare(
     StormLib
